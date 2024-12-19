@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ColorBuddy - AI Color Detection</title>
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e5d0ff, #03396c);
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header styling */
+        header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin: 0;
+            color: #ffffff;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        header p {
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #e5d0ff;
+            max-width: 600px;
+        }
+
+        /* Button styling */
+        button {
+            background-color: #03396c;
+            color: #ffffff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        button:hover {
+            background-color: #02284d;
+            transform: translateY(-3px);
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Webcam and label container */
+        #webcam-container {
+            margin: 20px auto;
+            border: 5px solid #03396c;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #label-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        #label-container div {
+            background-color: #ffffff;
+            color: #03396c;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin: 5px 0;
+            width: 80%;
+            text-align: center;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            font-size: 1.1em;
+        }
+
+        /* Footer styling */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            background: #03396c;
+            width: 100%;
+            text-align: center;
+            color: #e5d0ff;
+        }
+
+        footer p {
+            font-size: 0.9em;
+            margin: 0;
+        }
+
+        footer a {
+            color: #e5d0ff;
+            text-decoration: underline;
+        }
+
+        footer a:hover {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <h1>ColorBuddy</h1>
+        <p>
+            Welcome to ColorBuddy! This AI-powered application is designed to assist users, 
+            especially those with color blindness, by identifying colors in real-time using your webcam. 
+            Simply click "Start," and the system will detect and display color predictions.
+        </p>
+    </header>
+
+    <!-- Button to Start Webcam -->
+    <button type="button" onclick="init()">Start</button>
+
+    <!-- Webcam and Label Containers -->
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Built by: Kasiet with ❤️ using Teachable Machine and TensorFlow.js. <br>
+            Learn more about AI-powered applications on <a href="https://teachablemachine.withgoogle.com/" target="_blank">Teachable Machine</a>.
+        </p>
+    </footer>
+
+    <!-- TensorFlow.js and Teachable Machine Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+    <!-- Your Custom Script -->
+    <script type="text/javascript">
+        const URL = "https://teachablemachine.withgoogle.com/models/RX10TV2MR/";
+
+        let model, webcam, labelContainer, maxPredictions;
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            // Load the model and metadata
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+
+            // Setup webcam
+            const flip = true; // Flip webcam (mirror image)
+            webcam = new tmImage.Webcam(300, 300, flip);
+            await webcam.setup(); // Request webcam access
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            // Append webcam to DOM
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
+            }
+        }
+
+        async function loop() {
+            webcam.update(); // Update webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+        }
+    </script>
+</body>
+</html>
+
