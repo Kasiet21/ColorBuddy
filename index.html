@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,17 +118,15 @@
     <header>
         <h1>ColorBuddy</h1>
         <p>
-            Welcome to ColorBuddy! This AI-powered application helps users, especially those with color blindness, by identifying colors in real-time using your webcam or an uploaded image. 
+            Welcome to ColorBuddy! This AI-powered application helps users, especially those with color blindness, by identifying colors in real-time using your webcam. Click "Start" to detect the color in front of your camera.
         </p>
     </header>
 
-    <!-- Button to Start Webcam and File Upload -->
-    <button type="button" onclick="init()">Start Webcam</button>
+    <!-- Button to Start Webcam -->
+    <button type="button" onclick="init()">Start</button>
 
-    <!-- Image Upload Section -->
-    <input type="file" id="upload" accept="image/*">
-    <h2>Uploaded Image:</h2>
-    <img id="uploaded-image" width="224" height="224" alt="Uploaded Image">
+    <!-- Webcam and Color Name Containers -->
+    <div id="webcam-container"></div>
     <div id="label-container">
         <div id="color-name">Waiting for color...</div>
     </div>
@@ -188,38 +187,7 @@
             // Display the color name with the highest probability
             document.getElementById("color-name").innerHTML = highestPrediction.className;
         }
-
-        // Handle Image Upload
-        const upload = document.getElementById('upload');
-        const uploadedImage = document.getElementById('uploaded-image');
-
-        upload.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const img = document.createElement('img');
-                img.src = URL.createObjectURL(file);
-
-                // Wait for the image to load
-                img.onload = async () => {
-                    uploadedImage.src = img.src;
-
-                    const tensor = tf.browser.fromPixels(img)
-                        .resizeNearestNeighbor([224, 224]) // Resize image
-                        .expandDims(); // Add batch dimension for prediction
-
-                    const predictions = await model.predict(tensor).data();
-                    let highestPrediction = predictions[0];
-                    for (let i = 1; i < maxPredictions; i++) {
-                        if (predictions[i].probability > highestPrediction.probability) {
-                            highestPrediction = predictions[i];
-                        }
-                    }
-
-                    // Display the result
-                    document.getElementById("color-name").innerHTML = highestPrediction.className;
-                };
-            }
-        });
     </script>
 </body>
 </html>
+
