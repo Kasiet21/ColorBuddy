@@ -173,7 +173,7 @@
 
     <!-- Footer -->
     <footer>
-        <p>Built with ❤️ using Teachable Machine, By: Kasiet<br>
+        <p>Built with ❤️ using Teachable Machine and TensorFlow.js. <br>
             Learn more about AI-powered applications on <a href="https://teachablemachine.withgoogle.com/" target="_blank">Teachable Machine</a>.
         </p>
     </footer>
@@ -242,6 +242,7 @@
                 img.onload = async () => {
                     uploadedImage.src = img.src;
 
+                    // Perform prediction
                     const tensor = tf.browser.fromPixels(img)
                         .resizeNearestNeighbor([224, 224]) // Resize image
                         .expandDims(); // Add batch dimension for prediction
